@@ -17,6 +17,7 @@ namespace TomogramVisualizer
         Bin bin;
         View view;
         bool loaded;
+        bool needReload;
         int currentLayer;
         int frameCount;
         DateTime nextFPSUpdate = DateTime.Now.AddSeconds(1);
@@ -27,7 +28,8 @@ namespace TomogramVisualizer
             bin = new Bin();
             view = new View();
             loaded = false;
-            currentLayer = 2;
+            needReload = false;
+            currentLayer = 0;
             bin.ReadBin("testbin.bin");
         }
 
@@ -49,7 +51,14 @@ namespace TomogramVisualizer
         {
             if (loaded)
             {
-                view.DrawQuads(currentLayer);
+                //view.DrawQuads(currentLayer);
+                if (needReload)
+                {
+                    view.GenerateTextureImage(currentLayer);
+                    view.Load2DTexture();
+                    needReload = false;
+                }
+                view.DrawTexture();
                 glControl1.SwapBuffers();
             }
         }
@@ -57,6 +66,7 @@ namespace TomogramVisualizer
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             currentLayer = trackBar1.Value;
+            needReload = true;
         }
 
         void Application_Idle(object sender, EventArgs e)
